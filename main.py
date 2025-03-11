@@ -25,7 +25,7 @@ def get_next_token_contrastive_decoding(text, expert_model, amateur_model, token
 
     # Compute V_head
     p_max = torch.max(probabilities_expert)
-    print(f"p_max: {p_max}")
+    #print(f"p_max: {p_max}")
 
     # Select all indices where the probability is greater than alpha * p_max
     indices = torch.where(probabilities_expert > alpha * p_max)[0]
