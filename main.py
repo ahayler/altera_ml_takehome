@@ -2,22 +2,26 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
 
 
-def get_next_token_contrastive_decoding(text, expert_model, amateur_model, tokenizer, alpha=0.1):
+def get_next_token_contrastive_decoding(text, expert_model, amateur_model, tokenizer, alpha=0.1, temperature_amateur=1):
     # Tokenize the input text
     inputs = tokenizer(text, return_tensors="pt", return_token_type_ids=False)
+
+    # For amateur, only use the last token
+    last_token_id = inputs['input_ids'][0, -1:]
+    amateur_inputs = {'input_ids': last_token_id.unsqueeze(0)} 
     
     # Get model outputs
     with torch.no_grad():
         outputs_expert = expert_model(**inputs)
-        outputs_amateur = amateur_model(**inputs)
+        outputs_amateur = amateur_model(**amateur_inputs)
 
     # Get logits for the last token
     logits_expert = outputs_expert.logits[0, -1, :]
-    logits_amateur = outputs_amateur.logits[0, -1, :]
+    logits_amateur = outputs_amateur.logits[0, -1, :] / temperature_amateur
 
     # Compute the probablities
     probabilities_expert = torch.nn.functional.softmax(logits_expert, dim=-1)
-    probabilities_amateur = torch.nn.functional.softmax(logits_amateur, dim=-1)
+    probabilities_amateur = torch.nn.functional.softmax(logits_amateur, dim=-1) 
 
     # Compute V_head
     p_max = torch.max(probabilities_expert)
