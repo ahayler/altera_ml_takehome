@@ -82,9 +82,6 @@ def main():
     text = "Barack Obama was born in Honolulu, Hawaii. He was born in"
     print("\nInput text:")
     print(text)
-    
-    # Get next token predictions
-    #predictions = get_next_token_logits(text, amateur_model, tokenizer)
 
     for i in range(10):
         prediction_cl = get_next_token_contrastive_decoding(text, expert_model, amateur_model, tokenizer)
